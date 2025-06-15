@@ -7,6 +7,7 @@ class Settings {
     public static function init() {
         add_filter('wpforms_builder_settings_sections', [__CLASS__, 'add_settings_section'], 20, 1); // <--- adds new section tab
         add_filter('wpforms_form_settings_panel_content', [__CLASS__, 'render_fiuu_settings'], 20, 1); // <--- FIXED: render content for custom section
+        add_filter('wpforms_form_settings_defaults', [__CLASS__, 'register_fiuu_defaults'], 20, 1); // <--- ADDED: register defaults so settings are saved
     }
 
     public static function add_settings_section($sections) {
@@ -51,5 +52,13 @@ class Settings {
         );
 
         echo '</div>';
+    }
+
+    public static function register_fiuu_defaults($defaults) { // <--- ADDED METHOD
+        $defaults['fiuu_enable'] = false;
+        $defaults['fiuu_api'] = '';
+        $defaults['fiuu_merchant'] = '';
+        $defaults['fiuu_amount'] = '';
+        return $defaults;
     }
 }
