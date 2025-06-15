@@ -5,35 +5,51 @@ defined('ABSPATH') || exit;
 
 class Settings {
     public static function init() {
-        add_filter('wpforms_form_settings_panel_content', [__CLASS__, 'add_settings'], 10, 2);
+        add_filter('wpforms_builder_settings_sections', [__CLASS__, 'add_settings_section'], 20, 1); // <--- adds new section tab
+        add_filter('wpforms_form_settings_panel_content', [__CLASS__, 'render_fiuu_settings'], 20, 1); // <--- FIXED: render content for custom section
     }
 
-    public static function add_settings($content, $form_data) {
-        $enabled = !empty($form_data['settings']['fiuu_enable']) ? '1' : '0';
-        $api = !empty($form_data['settings']['fiuu_api']) ? esc_attr($form_data['settings']['fiuu_api']) : '';
-        $merchant = !empty($form_data['settings']['fiuu_merchant']) ? esc_attr($form_data['settings']['fiuu_merchant']) : '';
-        $amount = !empty($form_data['settings']['fiuu_amount']) ? esc_attr($form_data['settings']['fiuu_amount']) : '';
+    public static function add_settings_section($sections) {
+        $sections['fiuu'] = __('FIUU Integration', 'wpforms-fiuu');
+        return $sections;
+    }
 
-        ob_start();
-        ?>
-        <div class="wpforms-panel-field">
-            <label for="fiuu_enable">Enable Fiuu Payment</label>
-            <input type="checkbox" name="settings[fiuu_enable]" value="1" <?php checked('1', $enabled); ?>>
-        </div>
-        <div class="wpforms-panel-field">
-            <label>Fiuu API Key</label>
-            <input type="text" name="settings[fiuu_api]" value="<?php echo $api; ?>" />
-        </div>
-        <div class="wpforms-panel-field">
-            <label>Fiuu Merchant ID</label>
-            <input type="text" name="settings[fiuu_merchant]" value="<?php echo $merchant; ?>" />
-        </div>
-        <div class="wpforms-panel-field">
-            <label>Amount (USD)</label>
-            <input type="number" step="0.01" name="settings[fiuu_amount]" value="<?php echo $amount; ?>" />
-        </div>
-        <?php
-        $content .= ob_get_clean();
-        return $content;
+    public static function render_fiuu_settings($instance) {
+        echo '<div class="wpforms-panel-content-section wpforms-panel-content-section-fiuu">';
+        echo '<div class="wpforms-panel-content-section-title">' . __('Fiuu Payment Settings', 'wpforms-fiuu') . '</div>';
+
+        \wpforms_panel_field(
+            'checkbox',              // type
+            'settings',              // settings section
+            'fiuu_enable',           // setting key
+            $instance->form_data,    // form data
+            __('Enable Fiuu Payment', 'wpforms-fiuu')
+        );
+
+        \wpforms_panel_field(
+            'text',
+            'settings',
+            'fiuu_api',
+            $instance->form_data,
+            __('Fiuu API Key', 'wpforms-fiuu')
+        );
+
+        \wpforms_panel_field(
+            'text',
+            'settings',
+            'fiuu_merchant',
+            $instance->form_data,
+            __('Fiuu Merchant ID', 'wpforms-fiuu')
+        );
+
+        \wpforms_panel_field(
+            'text', // <--- changed from 'number' to 'text' so it renders properly
+            'settings',
+            'fiuu_amount',
+            $instance->form_data,
+            __('Amount (USD)', 'wpforms-fiuu')
+        );
+
+        echo '</div>';
     }
 }
